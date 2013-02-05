@@ -1,4 +1,5 @@
 from __future__ import division
+from __future__ import with_statement
 import string
 
 from django.core.exceptions import ValidationError
@@ -37,12 +38,12 @@ class LengthValidator(object):
     def __call__(self, value):
         if self.min_length and len(value) < self.min_length:
             raise ValidationError(
-                self.message % _("Must be %s characters or more") % self.min_length,
-                code=self.code)
+                "Password is too short."
+            )
         elif self.max_length and len(value) > self.max_length:
             raise ValidationError(
-                self.message % _("Must be %s characters or less") % self.max_length,
-                code=self.code)
+                "Password is too long."
+            )
 
 class ComplexityValidator(object):
     message = _("Must be more complex (%s)")
@@ -75,28 +76,28 @@ class ComplexityValidator(object):
 
         if len(uppercase) < self.complexities.get("UPPER", 0):
             raise ValidationError(
-                self.message % _("Must contain %(UPPER)s or more uppercase characters") % self.complexities,
-                code=self.code)
+                "Must contain more uppercase characters."
+            )
         elif len(lowercase) < self.complexities.get("LOWER", 0):
             raise ValidationError(
-                self.message % _("Must contain %(LOWER)s or more lowercase characters") % self.complexities,
-                code=self.code)
+                "Must contain more lowercase characters."
+            )
         elif len(digits) < self.complexities.get("DIGITS", 0):
             raise ValidationError(
-                self.message % _("Must contain %(DIGITS)s or more digits") % self.complexities,
-                code=self.code)
+                "Must contain more digits."
+            )
         elif len(punctuation) < self.complexities.get("PUNCTUATION", 0):
             raise ValidationError(
-                self.message % _("Must contain %(PUNCTUATION)s or more punctuation character") % self.complexities,
-                code=self.code)
+                "Must contain more punctuation."
+            )
         elif len(non_ascii) < self.complexities.get("NON ASCII", 0):
             raise ValidationError(
-                self.message % _("Must contain %(NON ASCII)s or more non ascii characters") % self.complexities,
-                code=self.code)
+                "Must contain more symbol characters."
+            )
         elif len(words) < self.complexities.get("WORDS", 0):
             raise ValidationError(
-                self.message % _("Must contain %(WORDS)s or more unique words") % self.complexities,
-                code=self.code)
+                "Must contain more unique words."
+            )
 
 
 class BaseSimilarityValidator(object):
@@ -136,7 +137,7 @@ class BaseSimilarityValidator(object):
                     code=self.code)
 
 class DictionaryValidator(BaseSimilarityValidator):
-    message = _("Based on a dictionary word.")
+    message = _("Password is based on a dictionary word.")
     code = "dictionary_word"
 
     def __init__(self, words=None, dictionary=None):
@@ -152,9 +153,9 @@ class DictionaryValidator(BaseSimilarityValidator):
 
 
 class CommonSequenceValidator(BaseSimilarityValidator):
-    message = _("Based on a common sequence of characters")
+    message = _("Password is based on a common sequence of characters.")
     code = "common_sequence"
-        
+
 validate_length = LengthValidator(PASSWORD_MIN_LENGTH, PASSWORD_MAX_LENGTH)
 complexity = ComplexityValidator(PASSWORD_COMPLEXITY)
 dictionary_words = DictionaryValidator(dictionary=PASSWORD_DICTIONARY)
