@@ -56,6 +56,13 @@ Optional:
             "WORDS": 1        # Words (substrings seperates by a whitespace)
         }
 
+        
+    Specifies the length of a substring that matches against the 
+    common longest substring of a PASSWORD_COMMON_SEQUENCES
+    
+        PASSWORD_MAX_COMMON_SUBSTRING_LENGTH = 4 # Default
+
+
 Usage
 -----
 

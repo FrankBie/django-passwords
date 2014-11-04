@@ -22,6 +22,7 @@ COMMON_SEQUENCES = [
 # Settings
 PASSWORD_MIN_LENGTH = getattr(settings, "PASSWORD_MIN_LENGTH", 6)
 PASSWORD_MAX_LENGTH = getattr(settings, "PASSWORD_MAX_LENGTH", None)
+PASSWORD_MAX_COMMON_SUBSTRING_LENGTH = getattr(settings, "PASSWORD_MAX_COMMON_SUBSTRING_LENGTH", 4)
 PASSWORD_DICTIONARY = getattr(settings, "PASSWORD_DICTIONARY", None)
 PASSWORD_MATCH_THRESHOLD = getattr(settings, "PASSWORD_MATCH_THRESHOLD", 0.9)
 PASSWORD_COMMON_SEQUENCES =  getattr(settings, "PASSWORD_COMMON_SEQUENCES", COMMON_SEQUENCES)
@@ -156,7 +157,40 @@ class CommonSequenceValidator(BaseSimilarityValidator):
     message = _("Password is based on a common sequence of characters.")
     code = "common_sequence"
 
+class CommonSubStringValidator(object):
+    message = _("Too Similar to %(haystacks)s")
+    code = "common_substring"
+
+    def __init__(self, haystacks=None):
+        self.haystacks = haystacks if haystacks else []
+
+    def longest_common_substring(self, needle, haystack):
+        # source wikipedia
+        # http://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Longest_common_substring
+        m = [[0] * (1 + len(haystack)) for i in xrange(1 + len(needle))]
+        longest, x_longest = 0, 0
+        for x in xrange(1, 1 + len(needle)):
+            for y in xrange(1, 1 + len(haystack)):
+                if needle[x - 1] == haystack[y - 1]:
+                    m[x][y] = m[x - 1][y - 1] + 1
+                    if m[x][y] > longest:
+                        longest = m[x][y]
+                        x_longest = x
+                else:
+                    m[x][y] = 0
+        return needle[x_longest - longest: x_longest]
+
+    def __call__(self, value):
+        for haystack in self.haystacks:
+            a_common_substring = self.longest_common_substring(value, haystack)
+            if len(a_common_substring) >= PASSWORD_MAX_COMMON_SUBSTRING_LENGTH:
+                raise ValidationError(
+                    self.message % {"haystacks": "".join(a_common_substring)},
+                    code=self.code)
+
+
 validate_length = LengthValidator(PASSWORD_MIN_LENGTH, PASSWORD_MAX_LENGTH)
 complexity = ComplexityValidator(PASSWORD_COMPLEXITY)
 dictionary_words = DictionaryValidator(dictionary=PASSWORD_DICTIONARY)
 common_sequences = CommonSequenceValidator(PASSWORD_COMMON_SEQUENCES)
+common_substring = CommonSubStringValidator(PASSWORD_COMMON_SEQUENCES)
