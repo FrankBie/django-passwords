@@ -7,6 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_unicode
 from django.conf import settings
 
+
 COMMON_SEQUENCES = [
     "0123456789",
     "`1234567890-=",
@@ -27,6 +28,7 @@ PASSWORD_DICTIONARY = getattr(settings, "PASSWORD_DICTIONARY", None)
 PASSWORD_MATCH_THRESHOLD = getattr(settings, "PASSWORD_MATCH_THRESHOLD", 0.9)
 PASSWORD_COMMON_SEQUENCES =  getattr(settings, "PASSWORD_COMMON_SEQUENCES", COMMON_SEQUENCES)
 PASSWORD_COMPLEXITY = getattr(settings, "PASSWORD_COMPLEXITY", None)
+
 
 class LengthValidator(object):
     message = _("Invalid Length (%s)")
@@ -137,6 +139,7 @@ class BaseSimilarityValidator(object):
                     self.message % {"haystacks": ", ".join(self.haystacks)},
                     code=self.code)
 
+
 class DictionaryValidator(BaseSimilarityValidator):
     message = _("Password is based on a dictionary word.")
     code = "dictionary_word"
@@ -156,6 +159,7 @@ class DictionaryValidator(BaseSimilarityValidator):
 class CommonSequenceValidator(BaseSimilarityValidator):
     message = _("Password is based on a common sequence of characters.")
     code = "common_sequence"
+
 
 class CommonSubStringValidator(object):
     message = _("Too Similar to %(haystacks)s")
@@ -193,4 +197,4 @@ validate_length = LengthValidator(PASSWORD_MIN_LENGTH, PASSWORD_MAX_LENGTH)
 complexity = ComplexityValidator(PASSWORD_COMPLEXITY)
 dictionary_words = DictionaryValidator(dictionary=PASSWORD_DICTIONARY)
 common_sequences = CommonSequenceValidator(PASSWORD_COMMON_SEQUENCES)
-common_substring = CommonSubStringValidator(PASSWORD_COMMON_SEQUENCES)
+common_sub_string = CommonSubStringValidator(PASSWORD_COMMON_SEQUENCES)
